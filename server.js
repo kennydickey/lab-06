@@ -9,6 +9,8 @@ const app = express();
 
 app.use(cors());
 
+
+
 //-------------------------
 
 
@@ -26,7 +28,7 @@ app.get('/location', (request, response) => {
     response.status(200).send(location);
   }
   catch(error){
-    errorHandler('we messed up', response)
+    errorHandler('we messed up', request, response)
   }
 })
 
@@ -55,9 +57,12 @@ app.get('/weather', (request, response) => {
     response.status(200).send(newSkyArr);
   }
   catch(error){
-    errorHandler('we messed up', response)
+    errorHandler('we messed up', request, response)
   }
 })
+
+app.use('*', notFoundHandler);
+app.use(errorHandler);
 
 // //constructor
 function Forecast(skyResults){
@@ -67,20 +72,23 @@ function Forecast(skyResults){
 
 //----------------------------------------------
 
-function errorHandler(string, response){
-  response.status(500).send(string);
+function notFoundHandler(request, response) {
+  response.status(404).send('this route does not exist');
+}
+
+function errorHandler(error, request, response) {
+  response.status(500).send(error);
 }
 
 // search query where??
 
 
-
 //can use response.send or response.redirect (for htmls)
 
 //after all other routes
-app.get('*', (request, response) => {
-  response.status(404).send('this route does not exist');
-})
+// app.get('*', (request, response) => {
+//   response.status(404).send('this route does not exist');
+// })
 //turn on server
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`)

@@ -12,37 +12,76 @@ app.use(cors());
 //-------------------------
 
 
-
+//----------location--------------
 app.get('/location', (request, response) => {
-  let city = request.query.city;
-  console.log(city);
-  const geoData = require('./data/geo.json');
-  let geoDataResults = geoData[0];
+  try{
+    let city = request.query.city;
+    console.log(city);
+    //pull geodata from geo.json
+    const geoData = require('./data/geo.json');
 
-  let location = {
-    search_query: geoDataResults.place_id,
-    formatted_query: geoDataResults.display_name,
-    latitude: geoDataResults.lat,
-    longitude: geoDataResults.lon
+    //first instance of geodata;
+    let geoDataResults = geoData[0];
+    let location = new Location(city, geoDataResults)
+    response.status(200).send(location);
   }
-
-  response.send(location);
-
+  catch(error){
+    errorHandler('we messed up', response)
+  }
 })
 
-// function Location(city, locData){
-//   this.search_query = city;
-//   this.formatted_query = locData[0].lat;
-//   this.latitude = locData[0].lat;
-//   this. longitude = locData[0].long
-// }
+//constructor
+function Location(city, locData){
+  this.search_query = city;
+  this.formatted_query = locData.display_name;
+  this.latitude = locData.lat;
+  this.longitude = locData.lon;
+}
 
+//weather-------------------------------------------
 
+app.get('/weather', (request, response) => {
+  try{
+    //pull skyData from geo.json
+    const skyData = require('./data/darksky.json');
+    let skyArr = skyData.daily.data;
+    console.log(skyArr);
+    const newSkyArr = []
+    for(let i = 0; i < skyArr.length; i++){
+      newSkyArr.push(new Forecast(skyArr[i]));
+    }
+    //first instance of skyData;
+    console.log(newSkyArr)
+    response.status(200).send(newSkyArr);
+  }
+  catch(error){
+    errorHandler('we messed up', response)
+  }
+})
+
+// //constructor
+function Forecast(skyResults){
+  this.forecast = skyResults.summary;
+  this.time = skyResults.time;
+}
+
+//----------------------------------------------
+
+function errorHandler(string, response){
+  response.status(500).send(string);
+}
 
 // search query where??
 
 
 
+//can use response.send or response.redirect (for htmls)
+
+//after all other routes
+app.get('*', (request, response) => {
+  response.status(404).send('this route does not exist');
+})
+//turn on server
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`)
 })

@@ -5,16 +5,40 @@ require('dotenv').config();
 const superagent = require('superagent')
 //npm i -S superagent
 const cors = require('cors');
-
+// const pg = require('pg');
+// const client = new pg.Client(process.env.DATABASE_URL);
+// client.on('error', err => console.error(err));
 
 const PORT = process.env.PORT || 3001;
 const app = express(); //our server (as a file)
 
-
 app.use(cors());
+
+// app.get('/add', (request, response) => {
+// let firstName = request.query.first;
+// let lastName = request.query.last;
+// let search_query = new Location(city);
+// let formatted_query = locData.display_name;
+// let latitude = locData.lat;
+// let longitude = locData.lon;
+// let safeValues = [city, lat, lon];
+// client.query(SQL, safeValues)
+//   .then( results => {
+//     response.status(200).json(results);
+//   })
+//   .catch( error => errorHandler(error) );
+// });
+// console.log('firstName: ', firstName);
+// console.log('flastName: ', lastName);
+
+// let sql = 'INSERT INTO people (last_name)'
+
+
 //-------------------------
 
 let locations = {};
+
+
 
 //----------location--------------
 app.get('/location', (request, response) => {
@@ -133,6 +157,10 @@ app.listen(PORT, () => {
 })
 
 
+
+// client.connect()
+//   .then(app.listen(PORT, () => console.log(`listening on port: ${PORT}`)))
+//   .catch((err) => console.error(err));
 
 
 

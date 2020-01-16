@@ -97,16 +97,24 @@ app.get('/weather', (request, response) => {
   }
 })
 
-app.use('*', notFoundHandler);
-app.use(errorHandler);
-
 // //constructor
 function Forecast(skyResults){
   this.forecast = skyResults.summary;
   this.time = skyResults.time;
 }
 
+//events-----------------------------------
+app.get('/events', (request, response) => {
+  try{
+    
+
+
+
 //----------------------------------------------
+
+app.use('*', notFoundHandler);
+app.use(errorHandler);
+
 
 function notFoundHandler(request, response) {
   response.status(404).send('this route does not exist');

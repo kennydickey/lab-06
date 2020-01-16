@@ -8,7 +8,7 @@ const cors = require('cors');
 
 
 const PORT = process.env.PORT || 3001;
-const app = express();  //our server (as a file)
+const app = express(); //our server (as a file)
 
 
 app.use(cors());
@@ -68,22 +68,29 @@ function Location(city, locData){
 
 app.get('/weather', (request, response) => {
   try{
-    //pull skyData from geo.json
-    const skyData = require('./data/darksky.json');
-    let getWeather = skyData.daily.data;
+    //get skyData from geo.json
+    // const skyData = require('./data/darksky.json');
+    //create our own query string
+    // let getWeather = skyData.daily.data;
     // console.log(getWeather); //uncomment to see data
     // const getDailyWeather = []
     // for(let i = 0; i < getWeather.length; i++){
     //   getDailyWeather.push(new Forecast(getWeather[i]));
     // }
-    const getDailyWeather = getWeather.map(function(element) {
-      return new Forecast(element);
-    });
+    // const getDailyWeather = getWeather.map(function(element) {
+    //   return new Forecast(element);
+    // });
+    let {latitude, longitude} = request.query;
+    //get results from darksky to send to frontend
+    let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${latitude},${longitude}`;
 
-
-    //first instance of skyData;
-    console.log(getDailyWeather)
-    response.status(200).send(getDailyWeather);
+    superagent.get(url)
+      .then(superagentResults => {
+        const weatherArray = superagentResults.body.daily.data.map(day => {
+          return new Forecast(day)
+        })
+        response.status(200).send(weatherArray)
+      })
   }
   catch(error){
     errorHandler('we messed up', request, response)
@@ -108,12 +115,6 @@ function notFoundHandler(request, response) {
 function errorHandler(error, request, response) {
   response.status(500).send(error);
 }
-
-// search query where??
-
-
-//can use response.send or response.redirect (for htmls)
-
 //after all other routes
 // app.get('*', (request, response) => {
 //   response.status(404).send('this route does not exist');

@@ -104,8 +104,8 @@ function Forecast(skyResults){
 }
 
 //events-----------------------------------
-app.get('/events', (request, response) => {
-  try{
+// app.get('/events', (request, response) => {
+//   try{
     
 
 

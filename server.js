@@ -1,31 +1,55 @@
 'use strict';
 
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
+const superagent = require('superagent')
+//npm i -S superagent
+const cors = require('cors');
+
 
 const PORT = process.env.PORT || 3001;
-const app = express();
+const app = express();  //our server (as a file)
+
 
 app.use(cors());
-
-
-
 //-------------------------
 
+let locations = {};
 
 //----------location--------------
 app.get('/location', (request, response) => {
   try{
-    let city = request.query.city;
-    console.log(city);
-    //pull geodata from geo.json
-    const geoData = require('./data/geo.json');
+    // let city = request.query.city;
+    // // console.log(city); //uncomment to see data
+    // //pull geodata from geo.json
+    // const geoData = require('./data/geo.json');
 
-    //first instance of geodata;
-    let geoDataResults = geoData[0];
-    let location = new Location(city, geoDataResults)
-    response.status(200).send(location);
+    // //first instance of geodata;
+    // let geoDataResults = geoData[0];
+    // let location = new Location(city, geoDataResults)
+    // response.status(200).send(location);
+
+    let city = request.query.city;
+    let key = process.env.LOCATION_IQ_KEY;
+    let url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
+
+    if (locations[url]){
+      response.send(locations[url]);
+    } else {
+      superagent.get(url)
+        .then(data => {
+          const geoData = data.body[0];
+          const location = new Location(city, geoData);
+          locations[url] = location;
+          response.status(200).send(location);
+        })
+
+    }
+    // //after you get the json data
+    //   .then(results => {
+    //     console.log('i went to locationiq');
+    //     console.log('results', results);
+    //   })
   }
   catch(error){
     errorHandler('we messed up', request, response)
@@ -46,15 +70,20 @@ app.get('/weather', (request, response) => {
   try{
     //pull skyData from geo.json
     const skyData = require('./data/darksky.json');
-    let skyArr = skyData.daily.data;
-    console.log(skyArr);
-    const newSkyArr = []
-    for(let i = 0; i < skyArr.length; i++){
-      newSkyArr.push(new Forecast(skyArr[i]));
-    }
+    let getWeather = skyData.daily.data;
+    // console.log(getWeather); //uncomment to see data
+    // const getDailyWeather = []
+    // for(let i = 0; i < getWeather.length; i++){
+    //   getDailyWeather.push(new Forecast(getWeather[i]));
+    // }
+    const getDailyWeather = getWeather.map(function(element) {
+      return new Forecast(element);
+    });
+
+
     //first instance of skyData;
-    console.log(newSkyArr)
-    response.status(200).send(newSkyArr);
+    console.log(getDailyWeather)
+    response.status(200).send(getDailyWeather);
   }
   catch(error){
     errorHandler('we messed up', request, response)
